@@ -41,7 +41,7 @@ this timestamp is how the tool will know what saved songs are new, and should be
 ```
 docker run \
 -v /home/user/.cache-username:/.cache-username \
--v /home/user/jellyfin_dir:/jellyfin \
+-v /home/user/jellyfin/music_library:/jellyfin \
 -e SPOTIPY_CLIENT_ID="" \
 -e SPOTIPY_CLIENT_SECRET="" \
 -e SPOTIPY_REDIRECT_URI="http://www.somesite.com" \
@@ -51,9 +51,7 @@ docker run \
 -e JELLYFIN_USERNAME="" \
 -e JELLYFIN_PASSWORD="" \
 -e JELLYFIN_SERVER="http://192.168.10.10" \
--e JELLYFIN_PORT="4042" \
 -e PUID="1000" \
 -e PGID="1000" \
 solidhal/jellyfin-spotify
 ```
-

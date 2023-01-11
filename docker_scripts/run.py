@@ -7,7 +7,7 @@ import subprocess
 import time
 import tempfile
 import errno
-from tool_scripts import airsonic_import
+from tool_scripts import jellyfin_import
 from tool_scripts import spotify_update_playlist
 from tool_scripts import tsar
 
@@ -38,19 +38,18 @@ def main():
     spotify_username = get_envar("SPOTIFY_USERNAME")
     spotify_password = get_envar("SPOTIFY_PASSWORD")
     spotify_playlist_uri = get_envar("SPOTIFY_PLAYLIST_URI")
-    airsonic_username = get_envar("AIRSONIC_USERNAME")
-    airsonic_password = get_envar("AIRSONIC_PASSWORD")
-    airsonic_server = get_envar("AIRSONIC_SERVER")
-    airsonic_port = get_envar("AIRSONIC_PORT")
+    jellyfin_username = get_envar("JELLYFIN_USERNAME")
+    jellyfin_password = get_envar("JELLYFIN_PASSWORD")
+    jellyfin_server = get_envar("JELLYFIN_SERVER")
     schedule_frequency = get_envar("SCHEDULE_FREQUENCY")
 
     # ensure we have the required directories
-    airsonic_library_dir = "/airsonic"
+    jellyfin_library_dir = "/jellyfin"
     temp_import_dir = "/import"
     if not os.path.isdir(temp_import_dir):
         raise ValueError(f"import directory does not exist: {temp_import_dir}")
-    if not os.path.isdir(airsonic_library_dir):
-        raise ValueError(f"airsonic library directory does not exist: {airsonic_library_dir}")
+    if not os.path.isdir(jellyfin_library_dir):
+        raise ValueError(f"jellyfin library directory does not exist: {jellyfin_library_dir}")
 
     # ensure we have the required spotipy api cache
     spotipy_cache = f"/.cache-{spotify_username}"
@@ -58,39 +57,36 @@ def main():
         raise ValueError(f"spotipy authentication cache file is not avilable at: {spotipy_cache}")
 
     # check required all permissions
-    verify_writable(airsonic_library_dir)
+    verify_writable(jellyfin_library_dir)
     verify_writable(temp_import_dir)
 
     def run_update_spotify_playlist():
-        print("____ airsonic-spotify: START updating spotify playlist with new songs _____")
-        # TODO will this run in the root dir? if not then the cache token won't be available
-        # spotipy envars are provided by the caller
+        print("____ jellyfin-spotify: START updating spotify playlist with new songs _____")
         spotify_update_playlist.run(playlist_id=spotify_playlist_uri, username=spotify_username)
-        print("____ airsonic-spotify: FINISHED updating spotify playlist with new songs _____")
+        print("____ jellyfin-spotify: FINISHED updating spotify playlist with new songs _____")
 
     def run_tsar_and_import():
         run_update_spotify_playlist()
-        print("____ airsonic-spotify: START running tsar ____")
+        print("____ jellyfin-spotify: START running tsar ____")
         tsar.run(output_dir=temp_import_dir,
                   playlist_id=spotify_playlist_uri,
                   username=spotify_username,
                   password=spotify_password,
                   librespot_binary="/usr/bin/librespot",
-                  empty_playlist=True)
-        print("____ airsonic-spotify: FINISHED running tsar ____")
+                  empty_playlist=False)
+        print("____ jellyfin-spotify: FINISHED running tsar ____")
 
-        print("_____ airsonic-spotify: START importing new songs into airsonic ____")
-        airsonic_import.run(airsonic_username=airsonic_username,
-                             airsonic_password=airsonic_password,
-                             server=airsonic_server,
-                             port=airsonic_port,
+        print("_____ jellyfin-spotify: START importing new songs into jellyfin ____")
+        jellyfin_import.run(jellyfin_username=jellyfin_username,
+                             jellyfin_password=jellyfin_password,
+                             server=jellyfin_server,
                              import_dir=temp_import_dir,
-                             airsonic_library_dir=airsonic_library_dir,
+                             jellyfin_library_dir=jellyfin_library_dir,
                              empty_import_dir=True)
-        print("_____ airsonic-spotify: FINISHED importing new songs into airsonic ____")
+        print("_____ jellyfin-spotify: FINISHED importing new songs into jellyfin ____")
 
 
-    print("____ Running airsonic-spotify ____")
+    print("____ Running jellyfin-spotify ____")
     print(f"ENVARS: {os.environ}")
     print(f"waiting for scheduled tasks at time {schedule_frequency}...")
     if schedule_frequency == "NOW":
@@ -108,7 +104,7 @@ def main():
             schedule.run_pending()
             time.sleep(60)
 
-    print("Exiting airsonic-spotify")
+    print("Exiting jellyfin-spotify")
 
 
 if __name__ == "__main__":
