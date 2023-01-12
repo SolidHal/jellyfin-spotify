@@ -73,7 +73,7 @@ def main():
                   username=spotify_username,
                   password=spotify_password,
                   librespot_binary="/usr/bin/librespot",
-                  empty_playlist=False)
+                  empty_playlist=True)
         print("____ jellyfin-spotify: FINISHED running tsar ____")
 
         print("_____ jellyfin-spotify: START importing new songs into jellyfin ____")

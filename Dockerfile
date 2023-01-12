@@ -26,6 +26,8 @@ ENV SCHEDULE_FREQUENCY=""
 # spotipy authentication cache file mapped to "/.cache-<spotify_username>"
 
 ENV LANG C.UTF-8
+ENV TZ America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Get Ubuntu packages
 RUN apt-get update && apt-get install -y  --no-install-recommends \
@@ -67,7 +69,6 @@ RUN cd tool_scripts && ln -s /tsar/tsar.py tsar.py
 
 # Get supporting scripts
 COPY tool_scripts/jellyfin_api.py /tool_scripts/jellyfin_api.py
-COPY tool_scripts/jellyfin_import.py /tool_scripts/jellyfin_import.py
 COPY tool_scripts/jellyfin_import.py /tool_scripts/jellyfin_import.py
 COPY tool_scripts/spotify_update_playlist.py /tool_scripts/spotify_update_playlist.py
 

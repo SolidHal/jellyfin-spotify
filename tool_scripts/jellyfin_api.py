@@ -78,10 +78,15 @@ class jellyfin:
         endpoint = "Search/Hints"
         res = self.get(endpoint, parameters)["SearchHints"]
         for song in res:
-            if (song["AlbumArtist"] == artist_name or artist_name in song["Artists"]):
+            # match the song if the name is equivilent and one of the following are true
+            # 1) the results album artist matches the song artist
+            # 2) the song artist in in the results artists list
+            # 3) there is only one result, this is to handle when artist information gets poorly parsed by
+            # jellyfin
+            if song_name == song["Name"] and (song["AlbumArtist"] == artist_name or artist_name in song["Artists"] or len(res) == 1):
                 return song
 
-        print("unable to find song matching name: {name}, artist: {artist_name}")
+        print(f"unable to find song matching name: {song_name}, artist: {artist_name}, found the following songs: {res}")
         return None
 
     def item_file_path(self, item_id):
@@ -119,8 +124,6 @@ class jellyfin:
         print("library scan complete")
 
 
-
-
 def main():
     jelly = jellyfin(server_url, username, password)
 
@@ -150,7 +153,7 @@ def main():
     # print(r)
     # song_id1 = r["ItemId"]
 
-    # r = jelly.lookup_song("Blueberry", "Manatee Commune")
+    # r = jelly.lookup_song("//ashes// (remix) - akira talaba remix", "tip toe")
     # print(r)
     # song_id2 = r["ItemId"]
     # r = jelly.create_playlist("test8")

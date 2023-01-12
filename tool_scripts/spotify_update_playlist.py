@@ -11,8 +11,6 @@ import subprocess
 from json.decoder import JSONDecodeError
 
 
-    # print(json.dumps(playlist, sort_keys=True, indent=4))
-
 def start_api(username):
     """
     the following must be set:

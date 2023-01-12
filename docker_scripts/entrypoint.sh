@@ -35,7 +35,7 @@ mkdir -p /import
 # take ownership of our working directories and files
 chown abc:abc /import
 chown abc:abc /.cache-*
-chown abc:abc /airsonic
+chown abc:abc /jellyfin
 
 # run the actual script with proper permissions
 su abc -s /run.py
