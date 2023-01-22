@@ -49,10 +49,10 @@ RUN pip3 install \
 # clean up to minimize image size
 RUN rm -rf /var/cache/apt/archives && rm -rf /usr/share/doc && rm -rf /usr/share/man
 
-# Get librespot, use prebuilt x86_64 binary to minimize image size
+# Get librespot, use prebuilt binary to minimize image size
 # saves ~2GB of image size, and a ton of time
 # TODO switch to upstream librespot once PR has merged
-RUN wget https://github.com/SolidHal/librespot/releases/download/vdebug/librespot -O /usr/bin/librespot && chmod +x /usr/bin/librespot
+RUN wget https://github.com/SolidHal/librespot/releases/download/vdebug/librespot-$(arch) -O /usr/bin/librespot && chmod +x /usr/bin/librespot
 
 # create the user and group
 RUN useradd -u 911 -U -d /config -s /bin/false abc
