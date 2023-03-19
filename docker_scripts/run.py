@@ -88,6 +88,9 @@ def main():
 
     print("____ Running jellyfin-spotify ____")
     print(f"ENVARS: {os.environ}")
+    # Immediately update the playlist on start, this ensures our token is valid
+    run_update_spotify_playlist()
+
     print(f"waiting for scheduled tasks at time {schedule_frequency}...")
     if schedule_frequency == "NOW":
         run_tsar_and_import()
