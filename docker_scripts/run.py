@@ -66,6 +66,7 @@ def main():
         print("____ jellyfin-spotify: FINISHED updating spotify playlist with new songs _____")
 
     def run_tsar_and_import():
+        # update right before we run tsar to ensure we have all of the latest songs
         run_update_spotify_playlist()
         print("____ jellyfin-spotify: START running tsar ____")
         tsar.run(output_dir=temp_import_dir,
@@ -88,8 +89,6 @@ def main():
 
     print("____ Running jellyfin-spotify ____")
     print(f"ENVARS: {os.environ}")
-    # Immediately update the playlist on start, this ensures our token is valid
-    run_update_spotify_playlist()
 
     print(f"waiting for scheduled tasks at time {schedule_frequency}...")
     if schedule_frequency == "NOW":
@@ -100,6 +99,12 @@ def main():
         time.sleep(99999)
 
     else:
+        # Immediately update the playlist on start, this ensures our token is valid
+        run_update_spotify_playlist()
+        # in the rare case we would be scheduled to update the playlist again right away
+        # ensure enough time has passed so we don't double-add the songs
+        time.sleep(3)
+
         schedule.every().hour.do(run_update_spotify_playlist)
         # run off the our to avoid conflicting with the playlist update task
         schedule.every(1).day.at(schedule_frequency).do(run_tsar_and_import)
