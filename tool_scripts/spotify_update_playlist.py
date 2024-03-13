@@ -88,12 +88,24 @@ def get_playlist_timestamp(spotify_api, playlist_id):
     return spotify_time_to_datetime(playlist.get("description"))
 
 
-
 def run(playlist_id, username):
     spotify_api = start_api(username)
     timestamp = get_playlist_timestamp(spotify_api, playlist_id)
     new_tracks = get_new_saved_tracks(spotify_api, timestamp)
     if new_tracks:
+        playlist = spotify_api.playlist(playlist_id)
+        # filter out tracks that are already in the playlist so we don't double add them
+        existing_track_uris = {}
+        for track in playlist.get("tracks").get("items"):
+            existing_track_uris[track.get("track").get("uri")] = track.get("track").get("name")
+        print(f"playlist already contains {len(existing_track_uris)} tracks: {existing_track_uris}")
+        non_dup_new_tracks = []
+        for track_uri in new_tracks:
+            if existing_track_uris.get(track_uri, None) is not None:
+                print(f"skipping track {existing_track_uris.get(track_uri)} : {track_uri} as it is already in the playlist")
+            else:
+                non_dup_new_tracks.append(track_uri)
+        print(f"adding {len(non_dup_new_tracks)} non-duplicate new tracks: {non_dup_new_tracks}")
         spotify_api.playlist_add_items(playlist_id, new_tracks)
 
     set_playlist_timestamp(spotify_api, playlist_id)
