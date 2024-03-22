@@ -108,8 +108,35 @@ def get_jellyfin_song_id(jelly, song):
     def sanitize_string(in_string):
         return in_string.lower().lstrip(" ").rstrip("")
 
-    print(f"Looking for song using {song.name} {song.artist}")
-    r = jelly.lookup_song(song.name, song.artist)
+    # jellyfin search chokes hard on single quotes
+    # there doesn't seem to be a way to escape them
+    # additionally, search results are not handled properly:
+    # searching for a song named "Jack's Song" will not return a song titled "Jack's Song" when it should
+    # searching for "Jacks Song" will not return a song titled "Jacks's Song" when it should
+    # searching for "Jack" or "s Song" will return a song titled "Jack's Song" so lets search based on the longest string
+    # we can search by
+
+    lookup_song_name = song.name
+    if "'" in song.name:
+        print(f"single quote found in song name {song.name} picking a lookup_song_name")
+        lookup_song_name = ""
+        parts = song.name.split("'")
+        for part in parts:
+            if len(part) > len(lookup_song_name):
+                lookup_song_name = part
+
+    lookup_song_artist = song.artist
+    if "'" in song.artist:
+        print(f"single quote found in song name {song.artist} picking a lookup_song_artist")
+        lookup_song_artist = ""
+        parts = song.artist.split("'")
+        for part in parts:
+            if len(part) > len(lookup_song_artist):
+                lookup_song_artist = part
+
+
+    print(f"Looking for song {song.name} {song.artist} using {lookup_song_name} {lookup_song_artist}")
+    r = jelly.lookup_song(lookup_song_name, lookup_song_artist)
     if r is not None:
         item_id = r["ItemId"]
         res_path = jelly.item_file_path(item_id)
