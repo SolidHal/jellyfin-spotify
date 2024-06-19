@@ -206,6 +206,28 @@ def run(jellyfin_username, jellyfin_password, server, import_dir, jellyfin_libra
         for song in songs:
             os.remove(song.original_file)
 
+
+def run_manual(jellyfin_username, jellyfin_password, server, import_dir, jellyfin_library_dir, empty_import_dir, playlist_name):
+    if not os.path.isdir(import_dir):
+        raise ValueError(f"import directory does not exist: {import_dir}")
+    if not os.path.isdir(jellyfin_library_dir):
+        raise ValueError(f"jellyfin library directory does not exist: {jellyfin_library_dir}")
+
+    jelly = jellyfin_api.jellyfin(server, jellyfin_username, jellyfin_password)
+    songs = import_songs_jellyfin(import_dir, jellyfin_library_dir)
+    jelly.scan_library()
+
+    if playlist_name is not None:
+        print(f"creating new playlist {playlist_name}")
+        for song in songs:
+            get_jellyfin_song_id(jelly, song)
+        playlist_id = get_create_playlist(jelly, playlist_name)
+        update_playlist(jelly, playlist_id, songs)
+
+    if empty_import_dir:
+        for song in songs:
+            os.remove(song.original_file)
+
 @click.command()
 @click.option("--jellyfin_username", type=str, required=True, help="username of the user to login as")
 @click.option("--jellyfin_password", type=str, required=True, help="password of the user to login as")
