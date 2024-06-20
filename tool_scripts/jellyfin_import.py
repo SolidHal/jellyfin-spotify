@@ -124,12 +124,26 @@ def get_jellyfin_song_id(jelly, song):
         for part in parts:
             if len(part) > len(lookup_song_name):
                 lookup_song_name = part
+    if "—" in song.name:
+        print(f"long dash found in song name {song.name} picking a lookup_song_name")
+        lookup_song_name = ""
+        parts = song.name.split("—")
+        for part in parts:
+            if len(part) > len(lookup_song_name):
+                lookup_song_name = part
 
     lookup_song_artist = song.artist
     if "'" in song.artist:
-        print(f"single quote found in song name {song.artist} picking a lookup_song_artist")
+        print(f"single quote found in artist name {song.artist} picking a lookup_song_artist")
         lookup_song_artist = ""
         parts = song.artist.split("'")
+        for part in parts:
+            if len(part) > len(lookup_song_artist):
+                lookup_song_artist = part
+    if "—" in song.artist:
+        print(f"long dash found in artist name {song.artist} picking a lookup_song_artist")
+        lookup_song_artist = ""
+        parts = song.artist.split("—")
         for part in parts:
             if len(part) > len(lookup_song_artist):
                 lookup_song_artist = part
