@@ -67,6 +67,7 @@ RUN cd tool_scripts && ln -s /tsar/tsar.py tsar.py
 COPY tool_scripts/jellyfin_api.py /tool_scripts/jellyfin_api.py
 COPY tool_scripts/jellyfin_import.py /tool_scripts/jellyfin_import.py
 COPY tool_scripts/spotify_get_playlist_name.py /tool_scripts/spotify_get_playlist_name.py
+COPY tool_scripts/validate_spotify_cache.py /tool_scripts/validate_spotify_cache.py
 
 # dont buffer python log output
 ENV PYTHONUNBUFFERED="TRUE"

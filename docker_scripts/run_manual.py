@@ -9,6 +9,7 @@ import tempfile
 import errno
 from tool_scripts import jellyfin_import
 from tool_scripts import spotify_get_playlist_name
+from tool_scripts import validate_spotify_cache
 from tool_scripts import tsar
 
 
@@ -59,7 +60,17 @@ def main():
     verify_writable(jellyfin_library_dir)
     verify_writable(temp_import_dir)
 
+    # ensure our cache file works
+    validate_spotify_cache.run(username=spotify_username)
+
     def run_tsar_and_import(uri):
+
+        if "playlist" in uri:
+            playlist_name = spotify_get_playlist_name.run(username=spotify_username,
+                                                          playlist_id=uri)
+        else:
+            playlist_name = None
+
         print(f"____ jellyfin-spotify: START running tsar for uri {uri} ____")
         tsar.run(output_dir=temp_import_dir,
                   uri=uri,
@@ -68,12 +79,6 @@ def main():
                   librespot_binary="/usr/bin/librespot",
                   empty_playlist=False)
         print(f"____ jellyfin-spotify: FINISHED running tsar for uri {uri} ____")
-
-        if "playlist" in uri:
-            playlist_name = spotify_get_playlist_name.run(username=spotify_username,
-                                                          playlist_id=uri)
-        else:
-            playlist_name = None
 
         print(f"_____ jellyfin-spotify: START importing new songs into jellyfin  for uri {uri}  ____")
         jellyfin_import.run_manual(jellyfin_username=jellyfin_username,
