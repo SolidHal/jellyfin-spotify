@@ -151,6 +151,12 @@ def get_jellyfin_song_id(jelly, song):
 
     print(f"Looking for song {song.name} {song.artist} using {lookup_song_name} {lookup_song_artist}")
     r = jelly.lookup_song(lookup_song_name, lookup_song_artist)
+    if r is None:
+        print(f"no results when searching with {lookup_song_name} {lookup_song_artist}. Trying just {lookup_song_name}")
+        r = jelly.lookup_song(lookup_song_name, "")
+
+
+
     if r is not None:
         item_id = r["ItemId"]
         res_path = jelly.item_file_path(item_id)

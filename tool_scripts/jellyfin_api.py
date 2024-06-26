@@ -83,7 +83,7 @@ class jellyfin:
             # 2) the song artist in in the results artists list
             # 3) there is only one result, this is to handle when artist information gets poorly parsed by
             # jellyfin
-            if song_name == song["Name"] and (song["AlbumArtist"] == artist_name or artist_name in song["Artists"] or len(res) == 1):
+            if song_name in song["Name"] and (song["AlbumArtist"] == artist_name or artist_name in song["Artists"] or len(res) == 1):
                 return song
 
         print(f"unable to find song matching name: {song_name}, artist: {artist_name}, found the following songs: {res}")
