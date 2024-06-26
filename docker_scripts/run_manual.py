@@ -41,8 +41,6 @@ def main():
     jellyfin_password = get_envar("JELLYFIN_PASSWORD")
     jellyfin_server = get_envar("JELLYFIN_SERVER")
 
-    spotify_links = get_envar("SPOTIFY_LINKS")
-
 
     # ensure we have the required directories
     jellyfin_library_dir = "/jellyfin"
@@ -91,8 +89,10 @@ def main():
     print("____ Running jellyfin-spotify manual____")
     print(f"ENVARS: {os.environ}")
 
-    for link in spotify_links.split(","):
-        run_tsar_and_import(link)
+    # spotify links file is one link per line
+    with open("/spotify_links.txt") as spotify_links_file:
+        for link in spotify_links_file:
+            run_tsar_and_import(link)
 
     print("Exiting jellyfin-spotify manual")
 
