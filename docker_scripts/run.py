@@ -70,7 +70,7 @@ def main():
         run_update_spotify_playlist()
         print("____ jellyfin-spotify: START running tsar ____")
         tsar.run(output_dir=temp_import_dir,
-                  playlist_id=spotify_playlist_uri,
+                  uri=spotify_playlist_uri,
                   username=spotify_username,
                   password=spotify_password,
                   librespot_binary="/usr/bin/librespot",
