@@ -69,6 +69,12 @@ def canonical_artist(audiofile):
         # if the album artist is generic, just use the track artist
         if "Various Artists" in album_artist:
             return track_artist
+        elif "Various Artists" in track_artist:
+            return album_artist
+        elif "Traditional" in album_artist:
+            return track_artist
+        elif "Traditional" in track_artist:
+            return album_artist
         raise ValueError(f"could not determine canonical artist, track_artist = {track_artist}, album_artist = {album_artist}")
 
     return album_artist
