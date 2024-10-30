@@ -5,7 +5,6 @@ FROM ubuntu:latest
 ENV PUID=""
 ENV PGID=""
 ENV SPOTIFY_USERNAME=""
-ENV SPOTIFY_PASSWORD=""
 ENV SPOTIPY_CLIENT_ID=""
 ENV SPOTIPY_CLIENT_SECRET=""
 ENV SPOTIPY_REDIRECT_URI=""
@@ -21,6 +20,7 @@ ENV SCHEDULE_FREQUENCY=""
 
 # the following directories must be provided
 # JELLYFIN_LIBRARY_DIR mapped to /jellyfin
+# librespot cache directory mapped to /librespot_cache_dir, containing credentials.json
 
 # the following file must be provided
 # spotipy authentication cache file mapped to "/.cache-<spotify_username>"
@@ -51,8 +51,7 @@ RUN rm -rf /var/cache/apt/archives && rm -rf /usr/share/doc && rm -rf /usr/share
 
 # Get librespot, use prebuilt binary to minimize image size
 # saves ~2GB of image size, and a ton of time
-# TODO switch to upstream librespot once PR has merged
-RUN wget https://github.com/SolidHal/librespot/releases/download/vdebug/librespot-$(arch) -O /usr/bin/librespot && chmod +x /usr/bin/librespot
+RUN wget https://github.com/SolidHal/librespot/releases/download/v0.6.0-passthrough/librespot-release-$(arch) -O /usr/bin/librespot && chmod +x /usr/bin/librespot
 
 # create the user and group
 RUN useradd -u 911 -U -d /config -s /bin/false abc

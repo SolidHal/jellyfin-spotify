@@ -36,7 +36,6 @@ def main():
     spotipy_client_secret = get_envar("SPOTIPY_CLIENT_SECRET")
     spotipy_redirect_uri = get_envar("SPOTIPY_REDIRECT_URI")
     spotify_username = get_envar("SPOTIFY_USERNAME")
-    spotify_password = get_envar("SPOTIFY_PASSWORD")
     spotify_playlist_uri = get_envar("SPOTIFY_PLAYLIST_URI")
     jellyfin_username = get_envar("JELLYFIN_USERNAME")
     jellyfin_password = get_envar("JELLYFIN_PASSWORD")
@@ -56,6 +55,12 @@ def main():
     if not os.path.isfile(spotipy_cache):
         raise ValueError(f"spotipy authentication cache file is not avilable at: {spotipy_cache}")
 
+    # ensure we have the required librespot api cache
+    librespot_cache_dir = f"/librespot_cache_dir"
+    librespot_credentials_json = f"/librespot_cache_dir/credentials.json"
+    if not os.path.isfile(librespot_credentials_json):
+        raise ValueError(f"librespot credentials cache file is not avilable at: {librespot_credentials_json}")
+
     # check required all permissions
     verify_writable(jellyfin_library_dir)
     verify_writable(temp_import_dir)
@@ -71,8 +76,8 @@ def main():
         print("____ jellyfin-spotify: START running tsar ____")
         tsar.run(output_dir=temp_import_dir,
                   uri=spotify_playlist_uri,
+                  cache_dir=librespot_cache_dir,
                   username=spotify_username,
-                  password=spotify_password,
                   librespot_binary="/usr/bin/librespot",
                   empty_playlist=True)
         print("____ jellyfin-spotify: FINISHED running tsar ____")
