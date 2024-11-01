@@ -132,6 +132,13 @@ def get_jellyfin_song_id(jelly, song):
         for part in parts:
             if len(part) > len(lookup_song_name):
                 lookup_song_name = part
+    if '"' in song.name:
+        print(f"double quote found in song name {song.name} picking a lookup_song_name")
+        lookup_song_name = ""
+        parts = song.name.split('"')
+        for part in parts:
+            if len(part) > len(lookup_song_name):
+                lookup_song_name = part
     if "—" in song.name:
         print(f"long dash found in song name {song.name} picking a lookup_song_name")
         lookup_song_name = ""
@@ -148,6 +155,13 @@ def get_jellyfin_song_id(jelly, song):
         for part in parts:
             if len(part) > len(lookup_song_artist):
                 lookup_song_artist = part
+    if '"' in song.artist:
+        print(f"double quote found in artist name {song.artist} picking a lookup_song_artist")
+        lookup_song_artist = ""
+        parts = song.artist.split('"')
+        for part in parts:
+            if len(part) > len(lookup_song_artist):
+                lookup_song_artist = part
     if "—" in song.artist:
         print(f"long dash found in artist name {song.artist} picking a lookup_song_artist")
         lookup_song_artist = ""
@@ -160,7 +174,7 @@ def get_jellyfin_song_id(jelly, song):
     print(f"Looking for song {song.name} {song.artist} using {lookup_song_name} {lookup_song_artist}")
     r = jelly.lookup_song(lookup_song_name, lookup_song_artist)
     if r is None:
-        print(f"no results when searching with {lookup_song_name} {lookup_song_artist}. Trying just {lookup_song_name}")
+        print(f"no results when searching with {lookup_song_name} {lookup_song_artist}. Trying just: {lookup_song_name}")
         r = jelly.lookup_song(lookup_song_name, "")
 
 
@@ -203,15 +217,21 @@ def get_create_playlist(jelly, name):
 def update_playlist(jelly, playlist_id, songs):
     curr_size = jelly.lookup_playlist_items(playlist_id).get('TotalRecordCount')
 
-    new_ids = [song.jellyfin_song_id for song in songs]
+    new_ids = []
+    for song in songs:
+        # skip over songs without a jellyfin song id
+        if song.jellyfin_song_id:
+            new_ids.append(song.jellyfin_song_id)
+        else:
+            print(f"skipping song {song.name} as it is missing a jellyfin song id")
     jelly.add_playlist_items(playlist_id, new_ids)
-    expected_size = curr_size + len(songs)
+    expected_size = curr_size + len(new_ids)
 
     actual_size = jelly.lookup_playlist_items(playlist_id).get('TotalRecordCount')
 
     if(expected_size != actual_size):
-        raise ValueError(f"expected {expected_size} songs in playlist after adding {len(songs)} songs. Found {actual_size} songs in playlist.")
-    print(f"Added {len(songs)} songs to playlist {playlist_id}")
+        raise ValueError(f"expected {expected_size} songs in playlist after adding {len(new_ids)} songs. Found {actual_size} songs in playlist.")
+    print(f"Added {len(new_ids)} songs to playlist {playlist_id}")
 
 
 def run(jellyfin_username, jellyfin_password, server, import_dir, jellyfin_library_dir, empty_import_dir):
@@ -220,15 +240,30 @@ def run(jellyfin_username, jellyfin_password, server, import_dir, jellyfin_libra
     if not os.path.isdir(jellyfin_library_dir):
         raise ValueError(f"jellyfin library directory does not exist: {jellyfin_library_dir}")
 
+    failed_lookups = []
+
     jelly = jellyfin_api.jellyfin(server, jellyfin_username, jellyfin_password)
     songs = import_songs_jellyfin(import_dir, jellyfin_library_dir)
     jelly.scan_library()
     for song in songs:
-        get_jellyfin_song_id(jelly, song)
+        try:
+            get_jellyfin_song_id(jelly, song)
+        except ValueError as e:
+            print("Failed to find song in jellyfin, continuing")
+            # hold the error until later so we can try to do our best creating and filling the playlist
+            failed_lookups.append(e)
+
     date = datetime.datetime.now()
     playlist_name = date.strftime("%Y") + " " + date.strftime("%m") + " " + date.strftime("%B")
     playlist_id = get_create_playlist(jelly, playlist_name)
     update_playlist(jelly, playlist_id, songs)
+
+    if failed_lookups:
+        # if we failed some lookups, 
+        print("Failed the following lookups:")
+        for failed_lookup in failed_lookups:
+            print(failed_lookup)
+        raise ValueError("Failed to add all songs to playlist")
 
     if empty_import_dir:
         for song in songs:
