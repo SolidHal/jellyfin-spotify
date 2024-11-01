@@ -79,7 +79,7 @@ def main():
                   cache_dir=librespot_cache_dir,
                   username=spotify_username,
                   librespot_binary="/usr/bin/librespot",
-                  empty_playlist=True)
+                  empty_playlist=False)
         print("____ jellyfin-spotify: FINISHED running tsar ____")
 
         print("_____ jellyfin-spotify: START importing new songs into jellyfin ____")
@@ -91,6 +91,10 @@ def main():
                              empty_import_dir=True)
         print("_____ jellyfin-spotify: FINISHED importing new songs into jellyfin ____")
 
+        print("_____ jellyfin-spotify: START emptying playlist ____")
+        tsar.empty_playlist(uri=spotify_playlist_uri,
+                            username=spotify_username)
+        print("_____ jellyfin-spotify: FINISHED emptying playlist ____")
 
     print("____ Running jellyfin-spotify ____")
     print(f"ENVARS: {os.environ}")
