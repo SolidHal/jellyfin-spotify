@@ -64,7 +64,6 @@ def canonical_artist(audiofile):
     track_artist = sanitize_filename(audiofile.tag.artist.split(";")[0])
     album_artist = sanitize_filename(audiofile.tag.album_artist.split(";")[0])
 
-    # track_artist may be malformed and not split correctly. album_artist is more reliable
     if album_artist not in track_artist:
         # if the album artist is generic, just use the track artist
         if "Various Artists" in album_artist:
@@ -75,9 +74,12 @@ def canonical_artist(audiofile):
             return track_artist
         elif "Traditional" in track_artist:
             return album_artist
-        raise ValueError(f"could not determine canonical artist, track_artist = {track_artist}, album_artist = {album_artist}")
+        # if we get here and we have not found an appropriate artist, default to the track artist
+        # track artist is generally the correct artist
+        print(f"picking track artist as canonical artist, track_artist = {track_artist}, album_artist = {album_artist}")
+        return track_artist
 
-    return album_artist
+    return track_artist
 
 
 def import_songs_jellyfin(import_dir, jellyfin_library_dir):
