@@ -101,8 +101,18 @@ def main():
 
     # spotify links file is one link per line
     with open("/spotify_links.txt") as spotify_links_file:
-        for link in spotify_links_file:
-            run_tsar_and_import(link)
+        links = spotify_links_file.readlines()
+
+    for link in links:
+        run_tsar_and_import(link)
+
+        # remove the link from the file now that we have successfully imported it
+        with open("/spotify_links.txt", "w") as spotify_links_file:
+            for line in spotify_links_file:
+                if link not in line:
+                    spotify_links_file.write(line)
+
+
 
     print("Exiting jellyfin-spotify manual")
 
