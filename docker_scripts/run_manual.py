@@ -103,14 +103,18 @@ def main():
     with open("/spotify_links.txt") as spotify_links_file:
         links = spotify_links_file.readlines()
 
+    unimported_links = links
+
     for link in links:
         run_tsar_and_import(link)
 
         # remove the link from the file now that we have successfully imported it
-        with open("/spotify_links.txt", "w") as spotify_links_file:
-            for line in spotify_links_file:
-                if link not in line:
-                    spotify_links_file.write(line)
+        unimported_links.remove(link)
+
+        open("/spotify_links.txt", "w").close()
+        with open("/spotify_links.txt", "r+") as spotify_links_file:
+            for unimported_link in unimported_links:
+                spotify_links_file.write(unimported_link)
 
 
 
